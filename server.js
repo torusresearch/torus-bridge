@@ -1,5 +1,5 @@
-var messages = {}
-var messageQueue = []
+var requestQueue = []
+var responseQueue = []
 var express = require('express')
 var fs = require('fs')
 var https = require('https')
@@ -12,46 +12,38 @@ var {
 } = require('./utils')
 
 // called by dapp
-app.post('/request', (req, res) => {
-  var id = randID()
-  messages[id] = {
-    id,
-    input: req.body,
-  }
-  messageQueue.push(messages[id])
-  res.send(messages[id])
+app.post('/dappOutgoing', (req, res) => {
+  requestQueue.push(req.body)
+  res.send({
+    error: '',
+    message: 'message received'
+  })
 })
 
-app.get('/response', (req, res) => {
-  var id = req.query.id
-  if (messages[id]) {
-    res.send(messages[id])
-  } else {
-    res.status(400).send(`could not find id ${id}`)
-  }
+app.get('/dappIncoming', (req, res) => {
+  var data = responseQueue.shift()
+  res.send(data)
 })
 
 // called by torus
-app.get('/process', (req, res) => {
-  var message = messageQueue.shift()
-  res.send(message)
+app.get('/walletIncoming', (req, res) => {
+  var data = requestQueue.shift()
+  res.send(data)
 })
 
-app.post('/processed', (req, res) => {
-  var id = req.body.id
-  if (messages[id]) {
-    messages[id].output = req.body
-    res.send(messages[id])
-  } else {
-    res.status(400).send(`could not find id ${id}`)
-  }
+app.post('/walletOutgoing', (req, res) => {
+  responseQueue.push(req.body)
+  res.send({
+    error: '',
+    message: 'message received'
+  })
 })
 
 // debug
 app.get('/state', (req, res) => {
   res.send({
-    messages,
-    messageQueue
+    requestQueue,
+    responseQueue
   })
 })
 if (process.env.HTTPS_ENABLED) {
