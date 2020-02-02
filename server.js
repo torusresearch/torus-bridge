@@ -3,8 +3,10 @@ var messageQueue = []
 var express = require('express')
 var fs = require('fs')
 var https = require('https')
+var cors = require('cors')
 var app = express()
 app.use(express.json())
+app.use(cors())
 var {
   randID
 } = require('./utils')
