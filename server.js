@@ -3,11 +3,11 @@ var messageQueue = []
 var express = require('express')
 var fs = require('fs')
 var https = require('https')
-var key = fs.readFileSync('ssl/server.key')
-var cert = fs.readFileSync('ssl/server.crt')
 var app = express()
 app.use(express.json())
-var {randID} = require('./utils')
+var {
+  randID
+} = require('./utils')
 
 // called by dapp
 app.post('/request', (req, res) => {
@@ -53,7 +53,12 @@ app.get('/state', (req, res) => {
   })
 })
 if (process.env.HTTPS_ENABLED) {
-  https.createServer({key, cert}, app).listen(443)
+  var key = fs.readFileSync('ssl/server.key')
+  var cert = fs.readFileSync('ssl/server.crt')
+  https.createServer({
+    key,
+    cert
+  }, app).listen(443)
 } else {
   app.listen(3000)
 }
