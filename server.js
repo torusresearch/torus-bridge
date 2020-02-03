@@ -7,35 +7,34 @@ var cors = require('cors')
 var app = express()
 app.use(express.json())
 app.use(cors())
-var {
-  randID
-} = require('./utils')
 
 // called by dapp
 app.post('/dappOutgoing', (req, res) => {
   requestQueue.push(req.body)
   res.send({
-    error: '',
-    message: 'message received'
+    data: 'message received'
   })
 })
 
 app.get('/dappIncoming', (req, res) => {
   var data = responseQueue.shift()
-  res.send(data)
+  res.send({
+    data
+  })
 })
 
 // called by torus
 app.get('/walletIncoming', (req, res) => {
   var data = requestQueue.shift()
-  res.send(data)
+  res.send({
+    data
+  })
 })
 
 app.post('/walletOutgoing', (req, res) => {
   responseQueue.push(req.body)
   res.send({
-    error: '',
-    message: 'message received'
+    data: 'message received'
   })
 })
 
